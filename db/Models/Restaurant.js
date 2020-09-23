@@ -4,7 +4,7 @@ const RestaurantSchema = new mongoose.Schema({
     nombre: String,
     nit: String,
     propietario: String,
-    Calle: String,
+    calle: String,
     telefono: String,
     log: Number,
     lat: Number,
