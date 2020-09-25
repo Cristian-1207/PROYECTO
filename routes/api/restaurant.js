@@ -5,6 +5,9 @@ var router = express.Router();
 
 const RESTAURANT = require('./../../db/Models/Restaurant');
 
+//Guardar fotos
+const {catchFile, getFile} = require('./../../Utils/FileManagerOnRequest')
+
 
 router.get('/',(req,res) => {
     //validacion
@@ -96,7 +99,7 @@ router.patch('/:id',(req, res)=>{
                     doc: doc
                 })
             else
-                 res.status(200).json({
+                 res.status(400).json({
                      msn: 'el registro no existe'
                  })
         else   
@@ -119,7 +122,7 @@ router.delete('/:id',(req,res)=>{
                     doc: doc
                 })
             else
-                res.status(200).json({
+                res.status(400).json({
                     msn: 'el registro no existe'
                 })
         else 
@@ -127,6 +130,69 @@ router.delete('/:id',(req,res)=>{
                 error: err
             })
     })
+})
+
+//foto_lugar
+
+var pathFotoLugarStore = './public/foto_lugar/'
+var defaultNameFL = 'foto_lugar'
+var requestKeyImageFotoLugar ='img_foto_lugar'
+router.post('/upload/:id/foto_lugar',catchFile(requestKeyImageFotoLugar,pathFotoLugarStore,defaultNameFL),(req,res)=>{
+    var FileName = req.file.filename;
+    RESTAURANT.findByIdAndUpdate(req.params.id,{foto_lugar: FileName},(err,doc)=>{
+        if(!err){
+            if(doc)
+            res.status(200).json({
+                msn: 'ok -> foto_lugar añadido exitosamente', 
+                doc: doc
+            })
+            else
+                res.status(400).json({error: 'no existe este registro'})
+
+        }
+        else{
+            res.status(403).json({error: err});
+
+        }
+        
+    })
+})
+
+router.get('/download/foto_lugar/:filename',(req,res)=>{ 
+    var file =getFile(pathFotoLugarStore,req.params.filename);
+    res.contentType(file.mimetype);
+    res.status(200).send(file.content);
+})
+
+//logo
+var pathLogoStore = './public/logos/'
+var defaultName = 'logo'
+var requestKeyImageLogo ='img_logo'
+router.post('/upload/:id/logo',catchFile(requestKeyImageLogo,pathLogoStore,defaultName),(req,res)=>{
+    var FileName = req.file.filename;
+    RESTAURANT.findByIdAndUpdate(req.params.id,{logo: FileName},(err,doc)=>{
+        if(!err){
+            if(doc)
+            res.status(200).json({
+                msn: 'ok -> logo añadido exitosamente', 
+                doc: doc
+            })
+            else
+                res.status(400).json({error: 'no existe este registro'})
+
+        }
+        else{
+            res.status(403).json({error: err});
+
+        }
+        
+    })
+})
+
+router.get('/download/logo/:filename',(req,res)=>{ 
+    var file =getFile(pathLogoStore,req.params.filename);
+    res.contentType(file.mimetype);
+    res.status(200).send(file.content);
 })
 
  
