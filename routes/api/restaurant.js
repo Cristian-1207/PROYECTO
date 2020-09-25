@@ -93,7 +93,7 @@ router.patch('/:id',(req, res)=>{
    //validacion
     RESTAURANT.findByIdAndUpdate(req.params.id,req.body,(err,doc)=>{
         if(!err)
-            if(!doc)
+            if(doc)
                 res.status(200).json({
                     msn: 'ok registro actualizado',
                     doc: doc

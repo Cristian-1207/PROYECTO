@@ -44,6 +44,30 @@ router.post('/',(req, res)=>{
     })
 })
 
+
+//PATCH
+
+router.patch('/:id',(req, res)=>{
+    //validacion
+     MENU.findByIdAndUpdate(req.params.id,req.body,(err,doc)=>{
+         if(!err)
+             if(doc)
+                 res.status(200).json({
+                     msn: 'ok Menu actualizado',
+                     doc: doc
+                 })
+             else
+                  res.status(400).json({
+                      msn: 'el menu no existe'
+                  })
+         else   
+             res.status(403).json({
+                 error: err
+             })
+ 
+     })
+ })
+
 //DELETE
 
 router.delete('/:id',(req,res)=>{
