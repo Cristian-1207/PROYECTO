@@ -14,7 +14,7 @@ module.exports.catchFile = function(requestKey,pathStorage, Name){
       storage: multer.diskStorage(diskStr)
     }).single(requestKey);
 }
-// obtiene un archivo
+// obtiene un archivo restaurant
 module.exports.getFile=function(pathStorage,name){
   let dir = pathStorage + (pathStorage.charAt(pathStorage.length-1)=='/'? '':'/') + name;
   var file = fs.readFileSync(dir);

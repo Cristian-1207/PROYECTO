@@ -5,9 +5,9 @@ const MenuSchema = new mongoose.Schema({
     precio: String,
     descripcion: String,
     fechaderegistro: {type: Date, default: Date.now},
-    fotografiadelproducto: String
+    fotografia_producto: String
 });
 
-const MenusModel = mongoose.model('Menus', MenusSchema);
+const MenusModel = mongoose.model('Menus', MenuSchema);
 // importar el modelo
 module.exports = MenusModel;
