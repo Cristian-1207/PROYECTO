@@ -4,9 +4,13 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var { verifyToken } =require('./Utils/AuthJWT');
+
 var restaurantRouter = require('./routes/api/restaurant');
 var menuRouter = require('./routes/api/menu');
 var ordenRouter = require('./routes/api/orden');
+var usuarioRouter = require('./routes/api/usuario');
+var authRouter = require('./routes/api/auth');
 var app = express();
 
 
@@ -16,9 +20,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/api/auth', authRouter);
+app.use(verifyToken);
+app.use('/api/usuario', usuarioRouter);
 app.use('/api/restaurant', restaurantRouter);
 app.use('/api/menu', menuRouter);
 app.use('/api/orden', ordenRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
