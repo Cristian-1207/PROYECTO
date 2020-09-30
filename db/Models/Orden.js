@@ -1,7 +1,7 @@
 const { model } = require("mongoose");
 const mongoose = require("../conection");
 
-const OrdenSchema = new mongoose.Schema({
+var OrdenStructureSchema =({
     
     idcliente: String,
     lugardeenvio: Object, 
@@ -11,6 +11,12 @@ const OrdenSchema = new mongoose.Schema({
     pedidos: Array
 });
 
+
+
+const OrdenSchema = new mongoose.Schema(OrdenStructureSchema);
+
 const OrdenModel = mongoose.model('Orden', OrdenSchema);
 
-module.exports = OrdenModel;
+module.exports = {
+    OrdenStructureSchema,
+    OrdenModel};

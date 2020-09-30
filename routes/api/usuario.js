@@ -1,11 +1,10 @@
 var express = require('express');
 var router = express.Router();
-
-
+var sha1 = require('sha1');
 
 const USER = require('./../../db/Models/Usuario');
 
-const AuthJWT = require('./../../Utils/AuthJWT');
+
 
 router.get('/',(req,res) => {
     //validacion
@@ -28,6 +27,7 @@ router.get('/',(req,res) => {
 
 router.post('/',(req, res)=>{
     //validacion
+    req.body.password = sha1(req.body.password);
     var usuario = new USER(req.body);
     usuario.save((err, doc)=>{
         if(!err)

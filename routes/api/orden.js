@@ -1,7 +1,10 @@
 var express = require('express');
 var router = express.Router();
+var valid = require('./../../Utils/valid');
 
-const ORDEN = require('./../../db/Models/Orden');
+const {OrdenStructureSchema} = require('./../../db/Models/Orden');
+
+const ORDEN = require('./../../db/Models/Orden').OrdenModel;
 
 router.get('/',(req,res) => {
     //validacion
@@ -31,6 +34,17 @@ router.post('/',(req, res)=>{
     */
     req.body.hora_pedido = Date().toString().split(" ")[4];
     req.body.estado = 'pendiente';
+    
+    //validar
+    console.log(req.body,OrdenStructureSchema);
+    if(!valid.checkParams(req.body,OrdenStructureSchema)){
+        res.status(403).json({
+            msn: "error en los parametros"
+        });
+        return;
+
+    };
+    
     var orden = new ORDEN(req.body);
     orden.save((err, doc)=>{
         if(!err)

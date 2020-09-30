@@ -22,7 +22,7 @@ module.exports.verifyToken=(req, res, next)=> {
         jwt.verify(token, Key, (err, authData) => {
           if (err) {
             res.status(403).json({
-              msn: "Su cesion expiro, inicie sesion de nuevo"
+              msn: "Su sesion expiro, inicie sesion de nuevo"
             });
           } else {
               //verificacion de algun rol
@@ -40,7 +40,7 @@ module.exports.verifyToken=(req, res, next)=> {
                             }
                       break;
                   case "admin":
-                      nest();
+                      next();
                         break;
 
               }
