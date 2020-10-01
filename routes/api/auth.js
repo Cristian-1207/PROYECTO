@@ -18,6 +18,8 @@ router.post('/login',(req,res)=>{
             if(doc){
                 var token = AuthJWT.getToken({
                     nombre: doc.nombre,
+                    apellido: doc.apellido,
+                    ci: doc.ci,
                     email: doc.email,
                     rol: doc.rol
                 })

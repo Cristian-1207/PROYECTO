@@ -1,0 +1,32 @@
+<!-- template.ejs --!>
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Factura de Pedido</title>
+  </head>
+  <body>
+    <h1><%= nombre+" "+apellido+"  -  Ci:"+ci %></h1><br>
+    <h2><%="TOTAL: " +orden.pago_total %></h2>
+    <h1>Detalle de Pedido</h1>
+    <table style="width: 50%;" border="1px">
+      <tr>
+        <th>Menu.</th>
+        <th>Precio Unitario.</th>
+        <th>Cantidad.</th>
+        <th>Precio Total.</th>
+      </tr>
+      <% if (orden.pedidos.length) { %>
+        <% orden.pedidos.forEach(function (menu) { %>
+        <tr>
+        <td id="nombre"><%= menu.menu.nombre %></td>
+        <td id="precio_unitario"><%= menu.menu.precio %></td>
+        <td id="cantidad"><%= menu.cantidad %></td>
+        <td id="precio_total"><%= (menu.menu.precio*menu.cantidad) %></td>
+        </tr>
+        <% }) %>
+      <% } %>
+    </table>
+  </body>
+</html>

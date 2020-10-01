@@ -25,6 +25,7 @@ module.exports.verifyToken=(req, res, next)=> {
               msn: "Su sesion expiro, inicie sesion de nuevo"
             });
           } else {
+              req.authUser =authData;
               //verificacion de algun rol
               var rol = authData.rol;
               switch(rol){

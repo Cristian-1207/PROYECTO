@@ -20,6 +20,43 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+var ejs = require('ejs');
+
+
+
+app.get('/mail',async(req,res,next)=>{//renderisar
+  res.contentType('text/html')
+  var html = await ejs.renderFile('./views/ordenMail.ejs',
+    {
+      nombre: 'marco',
+      apellido: 'flores',
+      ci: '1234',
+      orden:{
+        _id: "234",
+        idcliente: 'werre',
+        lugardeenvio: {lat: 1234, log:443},
+        pago_total: 125,
+        hora_pedido: '21:45:12',
+        pedidos:[
+          {
+          idrestaurant: '123456',
+          idmenu: '4567',
+          menu: {
+            nombre: "milaneza",
+            precio: '15',
+          },
+          cantidad: 2
+        }
+        ]
+      }
+    }
+  );
+  res.send(new Buffer(html));
+})
+
+
+
+
 app.use('/api/auth', authRouter);
 app.use(verifyToken);
 app.use('/api/usuario', usuarioRouter);

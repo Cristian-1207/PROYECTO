@@ -6,6 +6,8 @@ const {OrdenStructureSchema} = require('./../../db/Models/Orden');
 
 const ORDEN = require('./../../db/Models/Orden').OrdenModel;
 
+const Mail = require('./../../Utils/Mail');
+
 router.get('/',(req,res) => {
     //validacion
     ORDEN.find({}).exec((err,docs)=>{
@@ -47,11 +49,24 @@ router.post('/',(req, res)=>{
     
     var orden = new ORDEN(req.body);
     orden.save((err, doc)=>{
-        if(!err)
+        if(!err){
+            Mail.sendMail(
+                req.authUser.email,
+                "Pedido realizado",
+                ''+req.authUser.nombre+' '+req.authUser.apellido+'\n'+'peido realiazado exitosamente con un valor de:' +req.body.pago_total,
+                (error,info)=>{
+                    if(error)
+                        console.log("Error Mail: ",error);
+                    else
+                        console.log("Mail: ","Correo enviado a ", req.authUser.email);
+                    
+                }
+                );
             res.status(200).json({
                 msn: 'ok inserta nuevo pedido',
                 doc: doc
             })
+        }
         else
             res.status(403).json({
                 error: err
