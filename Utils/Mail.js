@@ -1,5 +1,23 @@
 var nodemailer =require('nodemailer');
 
+//generar pdf
+var ejs = require('ejs');
+var htmlPdf =require('html-pdf');
+
+async function htmlToPdfBuffer(params) {
+    var path=('./views/ordenMail.ejs');
+  const html = await ejs.renderFile(path,params);
+  return new Promise((resolve, reject) => {
+    htmlPdf.create(html).toBuffer((err, buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buffer);
+      }
+    });
+  });
+}
+
 
 class Mail{
 
@@ -24,23 +42,22 @@ class Mail{
     }
 
 
-    sendMailWithFactura(to,subject,html,orden,cb){
+    async sendMailWithFactura(to,subject,html,info,cb){
             //renderisar
-
-
-
-
+        var fileBuffer = await htmlToPdfBuffer(info);
         var options = {
             from: 'Proyecto',
             to: to,
             subject: subject,
             html: html,
-            attachments: '' //pdf
+            attachments: {filename: 'factura.pdf', content: fileBuffer} //pdf
 
         }
         this.transporter.sendMail(options,cb);
 
     }
 }
+
+//
 
 module.exports = new Mail();

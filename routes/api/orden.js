@@ -5,6 +5,7 @@ var valid = require('./../../Utils/valid');
 const {OrdenStructureSchema} = require('./../../db/Models/Orden');
 
 const ORDEN = require('./../../db/Models/Orden').OrdenModel;
+const MENU = require('./../../db/Models/Menus');
 
 const Mail = require('./../../Utils/Mail');
 
@@ -34,11 +35,10 @@ router.post('/',(req, res)=>{
     * pago_total
     * pedidos   [{}idmenu,idrestaurant,cantidad]
     */
-    req.body.hora_pedido = Date().toString().split(" ")[4];
+    req.body.hora_pedido = (new Date().getDate()+"/"+(new Date().getMonth()+1)+"/"+(new Date().getFullYear()))+" "+ Date().toString().split(" ")[4];
     req.body.estado = 'pendiente';
     
     //validar
-    console.log(req.body,OrdenStructureSchema);
     if(!valid.checkParams(req.body,OrdenStructureSchema)){
         res.status(403).json({
             msn: "error en los parametros"
@@ -48,12 +48,26 @@ router.post('/',(req, res)=>{
     };
     
     var orden = new ORDEN(req.body);
-    orden.save((err, doc)=>{
+    orden.save(async(err, doc)=>{
         if(!err){
-            Mail.sendMail(
+            var orden = doc;
+            for(var i = 0;i<doc.pedidos.length;i++){
+                orden.pedidos[i].menu = await MENU.findOne({_id:orden.pedidos[i].idmenu}).exec();
+
+            }   
+            
+            var info={
+               nombre: req.authUser.nombre,
+               apellido: req.authUser.apellido,
+               ci:  req.authUser.ci,
+               orden: orden
+           }
+        
+            Mail.sendMailWithFactura(
                 req.authUser.email,
                 "Pedido realizado",
-                ''+req.authUser.nombre+' '+req.authUser.apellido+'\n'+'peido realiazado exitosamente con un valor de:' +req.body.pago_total,
+                '<p>'+req.authUser.nombre+' '+req.authUser.apellido+'\n'+'peido realiazado exitosamente con un valor de:' +req.body.pago_total+'</p>',
+                info,
                 (error,info)=>{
                     if(error)
                         console.log("Error Mail: ",error);
@@ -61,9 +75,10 @@ router.post('/',(req, res)=>{
                         console.log("Mail: ","Correo enviado a ", req.authUser.email);
                     
                 }
-                );
+            )
+
             res.status(200).json({
-                msn: 'ok inserta nuevo pedido',
+                msn: 'ok nuevo pedido',
                 doc: doc
             })
         }
@@ -72,7 +87,7 @@ router.post('/',(req, res)=>{
                 error: err
             })
     })
-})
+});
 
 
 router.patch('/:id',(req, res)=>{
