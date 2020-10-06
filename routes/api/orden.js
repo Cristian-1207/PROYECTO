@@ -25,7 +25,7 @@ router.get('/',(req,res) => {
    
 })
 
-router.post('/',(req, res)=>{
+router.post('/',async(req, res)=>{
     //validacion
 
     /** 
@@ -46,12 +46,23 @@ router.post('/',(req, res)=>{
         return;
 
     };
+    //precio total
+    var or = {...req.body};
+    let precioTotal = 0;
+
+    for(var i = 0;i<or.pedidos.length;i++){
+        let menu = await MENU.findOne({_id:or.pedidos[i].idmenu}).exec();
+        precioTotal+= menu.precio*or.pedidos[i].cantidad;
+    }   
+    req.body.pago_total = precioTotal;
     
-    var orden = new ORDEN(req.body);
-    orden.save(async(err, doc)=>{
+    var orden1 = new ORDEN({...req.body});
+    orden1.save(async(err, doc)=>{
         if(!err){
-            var orden = doc;
+            var orden = or;
+
             for(var i = 0;i<doc.pedidos.length;i++){
+                orden.pedidos[i]={...orden.pedidos[i]};
                 orden.pedidos[i].menu = await MENU.findOne({_id:orden.pedidos[i].idmenu}).exec();
 
             }   
@@ -78,7 +89,7 @@ router.post('/',(req, res)=>{
             )
 
             res.status(200).json({
-                msn: 'ok nuevo pedido',
+                msn: 'ok nuevo pedido realizado',
                 doc: doc
             })
         }
