@@ -137,7 +137,7 @@ router.delete('/:id',(req,res)=>{
 var pathFotoLugarStore = './public/foto_lugar/'
 var defaultNameFL = 'foto_lugar'
 var requestKeyImageFotoLugar ='img_foto_lugar'
-router.post('/upload/:id/foto_lugar',catchFile(requestKeyImageFotoLugar,pathFotoLugarStore,defaultNameFL),(req,res)=>{
+router.post('/upload/:id/foto_lugar',catchFile(requestKeyImageFotoLugar,pathFotoLugarStore,defaultNameFL,"jpg"),(req,res)=>{
     var FileName = req.file.filename;
     RESTAURANT.findByIdAndUpdate(req.params.id,{foto_lugar: FileName},(err,doc)=>{
         if(!err){
@@ -168,7 +168,7 @@ router.get('/download/foto_lugar/:filename',(req,res)=>{
 var pathLogoStore = './public/logos/'
 var defaultName = 'logo'
 var requestKeyImageLogo ='img_logo'
-router.post('/upload/:id/logo',catchFile(requestKeyImageLogo,pathLogoStore,defaultName),(req,res)=>{
+router.post('/upload/:id/logo',catchFile(requestKeyImageLogo,pathLogoStore,defaultName,"jpg"),(req,res)=>{
     var FileName = req.file.filename;
     RESTAURANT.findByIdAndUpdate(req.params.id,{logo: FileName},(err,doc)=>{
         if(!err){

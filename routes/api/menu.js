@@ -95,7 +95,7 @@ router.delete('/:id',(req,res)=>{
 var pathFProdStore = './public/foto_producto/'
 var defaultNameFProd = 'foto_producto'
 var requestKeyImageFProd ='img_foto_producto'
-router.post('/upload/:id/foto_producto',catchFile(requestKeyImageFProd,pathFProdStore,defaultNameFProd),(req,res)=>{
+router.post('/upload/:id/foto_producto',catchFile(requestKeyImageFProd,pathFProdStore,defaultNameFProd,"jpg"),(req,res)=>{
     var FileName = req.file.filename;
     MENU.findByIdAndUpdate(req.params.id,{fotografia_producto: FileName},(err,doc)=>{
         if(!err){

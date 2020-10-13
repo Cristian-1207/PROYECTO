@@ -2,11 +2,11 @@ var fs = require('fs');
 var multer=require('multer');
 var mime=require('mime');
 
-module.exports.catchFile = function(requestKey,pathStorage, Name){
+module.exports.catchFile = function(requestKey,pathStorage, Name,defExt){
     let diskStr={
       destination: pathStorage,
       filename: function(req,file,cb){
-          let ext =file.mimetype.split("/")[1];
+          let ext =((defExt)?defExt:file.mimetype.split("/")[1]);
         cb(null, Name + "_" + Date.now()+ "."+ ext);
       }
     };
