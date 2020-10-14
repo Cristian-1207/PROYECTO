@@ -25,7 +25,8 @@ router.post('/login',(req,res)=>{
                 })
                 res.status(200).json({
                     msn: 'ok sesion iniciada',
-                    _token: token
+                    _token: token,
+                    doc : doc
                 })
 
             }
