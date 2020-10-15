@@ -8,6 +8,10 @@ module.exports.getToken=function(payload){
 }
 
 module.exports.verifyToken=(req, res, next)=> {
+    if(req.url.indexOf('download')>0){
+        next();
+        return;
+    }
     //Recuperar el header
     const header = req.headers["authorization"];
     if (header  == undefined) {
