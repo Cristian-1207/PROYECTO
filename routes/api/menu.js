@@ -99,11 +99,13 @@ router.post('/upload/:id/foto_producto',catchFile(requestKeyImageFProd,pathFProd
     var FileName = req.file.filename;
     MENU.findByIdAndUpdate(req.params.id,{fotografia_producto: FileName},(err,doc)=>{
         if(!err){
-            if(doc)
-            res.status(200).json({
-                msn: 'ok -> foto_producto añadido exitosamente', 
-                doc: doc
-            })
+            if(doc){
+                doc.fotografia_producto = FileName;
+                res.status(200).json({
+                    msn: 'ok -> foto_producto añadido exitosamente', 
+                    doc: doc
+                })
+            }
             else
                 res.status(400).json({error: 'no existe este registro'})
 
