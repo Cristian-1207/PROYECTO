@@ -1,6 +1,8 @@
 const mongoose = require('./../conection');
+const  ObjectId = mongoose.Types.ObjectId;
 
 const MenuSchema = new mongoose.Schema({
+    id_restaurante: ObjectId,
     nombre: String,
     precio: String,
     descripcion: String,
