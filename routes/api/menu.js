@@ -12,7 +12,7 @@ const {catchFile, getFile} = require('./../../Utils/FileManagerOnRequest')
 
 router.get('/',(req,res) => {
     //validacion
-    MENU.find({}).exec((err,docs)=>{
+    MENU.find(req.query).exec((err,docs)=>{
         if(!err)
             res.status(200).json({
                 // devolver lista de todos los restaurantes
