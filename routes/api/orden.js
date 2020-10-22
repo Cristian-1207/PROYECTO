@@ -27,7 +27,12 @@ router.get('/',(req,res) => {
 
 router.post('/',async(req, res)=>{
     //validacion
-
+    if((req.body.lugardeenvio)=='string'){
+        req.body.lugardeenvio = JSON.parse(req.body.lugardeenvio);
+    }
+    if((req.body.pedidos)=='string'){
+        req.body.pedidos = JSON.parse(req.body.pedidos);
+    }
     /** 
     * @params
     * idcliente
