@@ -43,7 +43,7 @@ function sendFactura(or){
 
 router.get('/',(req,res) => {
     //validacion
-    ORDEN.find({}).exec((err,docs)=>{
+    ORDEN.find(req.query).exec((err,docs)=>{
         if(!err)
             res.status(200).json({
                 // devolver lista de todos los restaurantes
@@ -81,7 +81,7 @@ router.post('/',async(req, res)=>{
     * pedidos   [{}idmenu,idrestaurant,cantidad]
     */
     req.body.hora_pedido = (new Date().getDate()+"/"+(new Date().getMonth()+1)+"/"+(new Date().getFullYear()))+" "+ Date().toString().split(" ")[4];
-    req.body.estado = 'pendiente';
+    
     var ordenes = [];
     var restaurantes = [];
     for(let i=0;i<req.pedidos.length;i++)
