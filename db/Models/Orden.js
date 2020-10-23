@@ -2,7 +2,7 @@ const { model } = require("mongoose");
 const mongoose = require("../conection");
 
 var OrdenStructureSchema =({
-    
+    idrestaurante: String,
     idcliente: String,
     lugardeenvio: Object, 
     pago_total: Number,

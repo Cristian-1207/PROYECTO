@@ -9,6 +9,38 @@ const MENU = require('./../../db/Models/Menus');
 
 const Mail = require('./../../Utils/Mail');
 
+function sendFactura(or){
+    var orden = or;
+
+            for(var i = 0;i<doc.pedidos.length;i++){
+                orden.pedidos[i]={...orden.pedidos[i]};
+                orden.pedidos[i].menu = await MENU.findOne({_id:orden.pedidos[i].idmenu}).exec();
+
+            }   
+            //cambiar el usuario
+            var info={
+               nombre: req.authUser.nombre,
+               apellido: req.authUser.apellido,
+               ci:  req.authUser.ci,
+               orden: orden
+           }
+        
+            Mail.sendMailWithFactura(
+                req.authUser.email,
+                "Pedido realizado",
+                '<p>'+req.authUser.nombre+' '+req.authUser.apellido+'\n'+'peido realiazado exitosamente con un valor de:' +req.body.pago_total+'</p>',
+                info,
+                (error,info)=>{
+                    if(error)
+                        console.log("Error Mail: ",error);
+                    else
+                        console.log("Mail: ","Correo enviado a ", req.authUser.email);
+                    
+                }
+            )
+    
+};
+
 router.get('/',(req,res) => {
     //validacion
     ORDEN.find({}).exec((err,docs)=>{
@@ -33,6 +65,14 @@ router.post('/',async(req, res)=>{
     if((typeof req.body.pedidos)=='string'){
         req.body.pedidos = JSON.parse(req.body.pedidos);
     }
+    //validar
+    if(!valid.checkParams(req.body,OrdenStructureSchema)){
+        res.status(403).json({
+            msn: "error en los parametros"
+        });
+        return;
+
+    };
     /** 
     * @params
     * idcliente
@@ -42,68 +82,54 @@ router.post('/',async(req, res)=>{
     */
     req.body.hora_pedido = (new Date().getDate()+"/"+(new Date().getMonth()+1)+"/"+(new Date().getFullYear()))+" "+ Date().toString().split(" ")[4];
     req.body.estado = 'pendiente';
-    
-    //validar
-    if(!valid.checkParams(req.body,OrdenStructureSchema)){
-        res.status(403).json({
-            msn: "error en los parametros"
-        });
-        return;
+    var ordenes = [];
+    var restaurantes = [];
+    for(let i=0;i<req.pedidos.length;i++)
+	    if((restaurantes.indexOf(req.pedidos[i].idrestaurante)==-1)){
+		    restaurantes.push(req.pedidos[i].idrestaurante);
+    }
 
-    };
-    //precio total
-    var or = {...req.body};
-    let precioTotal = 0;
-
-    for(var i = 0;i<or.pedidos.length;i++){
-        let menu = await MENU.findOne({_id:or.pedidos[i].idmenu}).exec();
-        precioTotal+= menu.precio*or.pedidos[i].cantidad;
-    }   
-    req.body.pago_total = precioTotal;
-    
-    var orden1 = new ORDEN({...req.body});
-    orden1.save(async(err, doc)=>{
-        if(!err){
-            var orden = or;
-
-            for(var i = 0;i<doc.pedidos.length;i++){
-                orden.pedidos[i]={...orden.pedidos[i]};
-                orden.pedidos[i].menu = await MENU.findOne({_id:orden.pedidos[i].idmenu}).exec();
-
-            }   
-            
-            var info={
-               nombre: req.authUser.nombre,
-               apellido: req.authUser.apellido,
-               ci:  req.authUser.ci,
-               orden: orden
-           }
-        
-            Mail.sendMailWithFactura(
-                req.authUser.email,
-                "Pedido realizado",
-                '<p>'+req.authUser.nombre+' '+req.authUser.apellido+'\n'+'peido realiazado exitosamente con un valor de:' +req.body.pago_total+'</p>',
-                info,
-                (error,info)=>{
-                    if(error)
-                        console.log("Error Mail: ",error);
-                    else
-                        console.log("Mail: ","Correo enviado a ", req.authUser.email);
-                    
-                }
-            )
-
-            res.status(200).json({
-                msn: 'ok nuevo pedido realizado',
-                doc: doc
-            })
+    for(let i=0; i<restaurantes.length;i++){
+	    let pedidos = [];
+	    for(let j=0;j<req.pedidos.length;j++){
+		    if(restaurantes[j]==req.pedidos[j].idrestaurante){
+			    pedidos.push({... req.pedidos[j]});
+		    }
+	    }
+    	let pagoTotal= 0;
+        for(j=0;j<pedidos.length;i++){
+            let menu = await MENU.findOne({_id:pedidos[j].idmenu}).exe();
+            pago_total+= pedidos[j].cantidad * memu.precio;
         }
-        else
-            res.status(403).json({
-                error: err
-            })
-    })
-});
+	
+        ordenes.push({
+            idrestaurte: restaurantes[i],
+            idcliente: req.body.idcliente,
+            lugardeenvio: req.bodylugardeenvio,
+            pago_total: pagoTotal,
+            hora_pedido: req.body.hora_pedido,
+            estado: 'espera',
+            pedidos: pedidos
+        });
+
+    }
+    for(let i=0;i<ordenes.length;i++){
+        let orden = new ORDEN(ordenes[i]);
+        orden.save((err,doc)=>{
+            if(err){
+                res.status(403).json({
+                    error: err
+                }); 
+                return;           
+            }
+
+        });
+    }    
+    res.status(200).json({
+        msn: 'ok nuevo pedido realizado',
+        doc: ordenes
+    });
+})
 
 
 router.patch('/:id',(req, res)=>{
