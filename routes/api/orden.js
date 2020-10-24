@@ -3,38 +3,39 @@ var router = express.Router();
 var valid = require('./../../Utils/valid');
 
 const {OrdenStructureSchema} = require('./../../db/Models/Orden');
-
+const USUARIO = require('./../../db/Models/Usuario')
 const ORDEN = require('./../../db/Models/Orden').OrdenModel;
 const MENU = require('./../../db/Models/Menus');
 
 const Mail = require('./../../Utils/Mail');
 
-function sendFactura(or){
-    var orden = or;
+async function sendFactura(or){
 
-            for(var i = 0;i<doc.pedidos.length;i++){
-                orden.pedidos[i]={...orden.pedidos[i]};
-                orden.pedidos[i].menu = await MENU.findOne({_id:orden.pedidos[i].idmenu}).exec();
+    for(var i = 0;i<or.pedidos.length; i++){
+        or.pedidos[i] = {... or.pedidos[i]};
+        or.pedidos[i].menu = await MENU.findOne({_id:or.pedidos[i].idmenu}).exec();
+    }
 
-            }   
+            let user = await USUARIO.findOne({_id:or.idcliente}).exec();
+   
             //cambiar el usuario
             var info={
-               nombre: req.authUser.nombre,
-               apellido: req.authUser.apellido,
-               ci:  req.authUser.ci,
-               orden: orden
+               nombre: user.nombre,
+               apellido: user.apellido,
+               ci: user.ci,
+               orden: or
            }
         
             Mail.sendMailWithFactura(
-                req.authUser.email,
+                user.email,
                 "Pedido realizado",
-                '<p>'+req.authUser.nombre+' '+req.authUser.apellido+'\n'+'peido realiazado exitosamente con un valor de:' +req.body.pago_total+'</p>',
+                '<p>'+user.nombre+' '+user.apellido+'\n'+'pedido realizado exitosamente con un valor de:' +or.pago_total+'   '+'gracias por su compra'+'</p>',
                 info,
                 (error,info)=>{
                     if(error)
                         console.log("Error Mail: ",error);
                     else
-                        console.log("Mail: ","Correo enviado a ", req.authUser.email);
+                        console.log("Mail: ","Correo enviado a ", user.email);
                     
                 }
             )
@@ -65,14 +66,7 @@ router.post('/',async(req, res)=>{
     if((typeof req.body.pedidos)=='string'){
         req.body.pedidos = JSON.parse(req.body.pedidos);
     }
-    //validar
-    if(!valid.checkParams(req.body,OrdenStructureSchema)){
-        res.status(403).json({
-            msn: "error en los parametros"
-        });
-        return;
-
-    };
+    
     /** 
     * @params
     * idcliente
@@ -84,28 +78,28 @@ router.post('/',async(req, res)=>{
     
     var ordenes = [];
     var restaurantes = [];
-    for(let i=0;i<req.pedidos.length;i++)
-	    if((restaurantes.indexOf(req.pedidos[i].idrestaurante)==-1)){
-		    restaurantes.push(req.pedidos[i].idrestaurante);
+    for(let i=0;i<req.body.pedidos.length;i++)
+	    if((restaurantes.indexOf(req.body.pedidos[i].idrestaurante)==-1)){
+		    restaurantes.push(req.body.pedidos[i].idrestaurante);
     }
 
     for(let i=0; i<restaurantes.length;i++){
 	    let pedidos = [];
-	    for(let j=0;j<req.pedidos.length;j++){
-		    if(restaurantes[j]==req.pedidos[j].idrestaurante){
-			    pedidos.push({... req.pedidos[j]});
+	    for(let j=0;j<req.body.pedidos.length;j++){
+		    if(restaurantes[i]==req.body.pedidos[j].idrestaurante){
+			    pedidos.push({... req.body.pedidos[j]});
 		    }
 	    }
     	let pagoTotal= 0;
-        for(j=0;j<pedidos.length;i++){
-            let menu = await MENU.findOne({_id:pedidos[j].idmenu}).exe();
-            pago_total+= pedidos[j].cantidad * memu.precio;
+        for(let j=0;j<pedidos.length;j++){
+            let menu = await MENU.findOne({_id:pedidos[j].idmenu}).exec();
+            pagoTotal+= pedidos[j].cantidad * menu.precio;
         }
 	
         ordenes.push({
             idrestaurte: restaurantes[i],
             idcliente: req.body.idcliente,
-            lugardeenvio: req.bodylugardeenvio,
+            lugardeenvio: req.body.lugardeenvio,
             pago_total: pagoTotal,
             hora_pedido: req.body.hora_pedido,
             estado: 'espera',
@@ -136,11 +130,19 @@ router.patch('/:id',(req, res)=>{
    //validacion
     ORDEN.findByIdAndUpdate(req.params.id,req.body,(err,doc)=>{
         if(!err)
-            if(doc)
+            if(doc){
+                if(req.body.estado=="enviado"){
+                    sendFactura(doc);
+                }    
+
+
+
+
                 res.status(200).json({
                     msn: 'ok registro actualizado',
                     doc: doc
                 })
+            }
             else
                  res.status(400).json({
                      msn: 'el registro no existe'
